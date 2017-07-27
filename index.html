@@ -37,6 +37,7 @@
 var size = 400;
 var cursor = 1;
 var frames = 3;
+var xScale = 5;
 
 // define the path to plot
 var vertices = [];
@@ -44,24 +45,41 @@ vertices.push({
   x: size / 2,
   y: size / 8,
 });
+
 vertices.push({
-  x: size / 6,
+  x: size / xScale,
   y: size / 2
 });
+
 vertices.push({
-  x: size / 2,
-  y: size - size / 8,
-});
-vertices.push({
-  x: size - size / 6,
-  y: size / 2,
-});
-vertices.push({
-  x: size / 2,
-  y: size / 8
+  x: vertices[0].x,
+  y: size - vertices[0].y
 });
 
-for (let lines = 0; lines < 10; lines++){
+vertices.push({
+  x: size - vertices[1].x,
+  y: vertices[1].y
+});
+
+vertices.push({
+  x: vertices[0].x,
+  y: vertices[0].y
+});
+
+// vertices.push({
+//   x: size / 2,
+//   y: size - size / 8,
+// });
+// vertices.push({
+//   x: size - size / xScale,
+//   y: size / 2,
+// });
+// vertices.push({
+//   x: size / 2,
+//   y: size / 8
+// });
+
+for (let lines = 1; lines < 15; lines++){
   for(let i=0; i<4;i++){
     let point = vertices[i];
     let x = point.x;
@@ -124,18 +142,25 @@ function calcWaypoints(vertices) {
 
 
 function animate() {
-  if (cursor < points.length - 1) {
+  if (cursor < points.length / 2) {
     requestAnimationFrame(animate);
   }
 
-  ctx.beginPath();
+
   for(let i=0; i<frames; i++){
+    ctx.beginPath();
     let index = cursor + i;
-    console.log('cursor', i, cursor, index)
+    let reverseIndex = points.length - cursor;
+
     ctx.moveTo(points[index - 1].x, points[index - 1].y);
     ctx.lineTo(points[index].x, points[index].y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(points[reverseIndex].x, points[reverseIndex].y);
+    ctx.lineTo(points[reverseIndex - 1].x, points[reverseIndex - 1].y);
+    ctx.stroke();
   }
-  ctx.stroke();
 
   cursor += frames;
   // cursor ++;
