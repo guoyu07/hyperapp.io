@@ -5,12 +5,12 @@
 </head>
 
 <body>
-  <div id="logo"></div>
+  <div id="logo" style="width: 800px;height: 800px;text-align: center;"></div>
   <canvas id='canvas' width="400" height=400/>
 
   <script>
 
-    var size = 400;
+    var size = 200;
     var frames = 3;
     var xScale = 5;
 
@@ -76,44 +76,89 @@ for (let lines = 1; lines < 15; lines++){
       x: x,
       y: y,
     });
+
+    if (i === 3){
+      let startP = points[points.length  - 4];
+      points.push({
+        x: startP.x,
+        y: startP.y
+      })
+    }
   }
 }
 
 
-var c = Raphael("logo", size, size);
+var c = Raphael("logo", size * 2, size * 2);
 var pathes = [];
-console.log(points);
-let duration = 200;
-
-for(let i=0; i<points.length - 1; i++){
-  let steps = '';
-  let point = points[i];
-  let next = points[i + 1];
-  console.log(point, next);
-  steps += 'M' + point.x + ' ' + point.y;
-  steps += ' L' + next.x + ' ' + next.y;
-  pathes.push(steps);
-}
+var nodes = [];
+let duration = 150;
+let durationStep = (200 - 30) / points.length;
 
 setTimeout(animate, duration);
 
 var cursor = 0;
+// var group = c.set();
+// group.attr({
+//   transform: 'S2',
+// })
 
 function animate(){
-  if (cursor < points.length / 2 - 1){
+  if (cursor < points.length / 1 - 1){
     setTimeout(animate, duration);
+    duration -= durationStep;
+
+  } else {
+    // setTimeout(function(){
+    //   nodes.forEach(function(node){
+    //     node.animate({
+    //       transform: 'R0'
+    //     // }, 500, 'easeInOut');
+    //     }, 1000, 'elastic');
+    //   })
+    // }, duration);
   }
 
   let reverseCursor = points.length - cursor - 1;
-  drawLine(points[cursor], points[cursor + 1], duration);
-  drawLine(points[reverseCursor], points[reverseCursor - 1], duration);
+  let count = points.length;
+  let p1 = drawLine(points[cursor], points[cursor + 1], duration);
+  let p2 = drawLine(points[reverseCursor], points[reverseCursor - 1], duration);
+  let deg = 180 * cursor / points.length;
+
+  let center = size / 2;
+  let origin = center + ',' + center;
+  p1.attr({
+    // transform: 'R45,' + size / 2 + ',' + size / 2,
+    // transform: 'R' + deg + ',' + size / 2 + ',' + size / 2,
+    transform: `S1.5,1.5,${center},${center} R` + deg + ',' + center + ',' + size / 2,
+    // transform: 'R' + deg + ',' + center + ',' + size / 2,
+  })
+
+  p2.attr({
+    // transform: `S1.5,1.5,0,0 R-` + deg + ',' + center + ',' + size / 2,
+    transform: `S1.5,1.5,${center},${center} R-` + deg + ',' + center + ',' + size / 2,
+    // transform: 'R-' + deg + ',' + size / 2 + ',' + size / 2,
+  })
+
+  nodes.push(p1);
+  nodes.push(p2);
+  // group.push(p1, p2);
   cursor ++;
 }
 
-function drawLine(start, to, duration){
+function drawLine(start, to, duration, rotate){
   let startStr = 'M' + start.x + ' ' + start.y;
   let move = c.path(startStr);
-  move.animate({path: startStr + ' L' + to.x + ' ' + to.y}, duration);
+  // move.attr({'stroke-width': 3});
+  // move.attr({'stroke-alignment': 'inner'});
+  // move.attr({'stroke-linecap': 'square'});
+  move.attr({
+    'color': '#888',
+  });
+
+  move.animate({
+    path: startStr + ' L' + to.x + ' ' + to.y,
+  }, duration);
+  return move;
 }
 </script>
 </body>
