@@ -16,18 +16,48 @@
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.no-deps.min.js"></script> -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js'></script>
   <style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
   #logo{
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    /*position: absolute;*/
+    /*left: 0;*/
+    /*right: 0;*/
+    /*top: 0;*/
+    /*bottom: 0;*/
+    width: 400px;
+    text-align: center;
+    margin: 0 auto;
+  }
+  .container{
+    text-align: center;
+  }
+  h1{
+    font-size: 20px;
+    margin: 20px 0;
+  }
+  h2{
+    margin: 20px 0;
+    font-size: 13px;
+    font-weight: normal;
+    color: #888;
   }
   </style>
 </head>
 
 <body>
-  <div id="logo" style="width: 400px;height: 400px;text-align: center;margin: 0 auto;"></div>
+
+<div class="container">
+  <div id="logo" style=""></div>
+  <div id="bannter">
+    <h1> HyperApp </h1>
+    <h2>The missing App Store for linux server</h2>
+    <p></p>
+    <a href="https://itunes.apple.com/app/apple-store/id1179750280?pt=118260435&ct=io&mt=8">
+      <img src="https://linkmaker.itunes.apple.com/assets/shared/badges/en-us/appstore-lrg.svg" alt="View on App Store">
+    </a>
+  </div>
+</div>
 
   <script>
     var canvasSize = 400;
