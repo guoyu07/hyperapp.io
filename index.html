@@ -1,19 +1,41 @@
-<html>
-<head>
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="manifest" href="site.webmanifest">
+        <link rel="apple-touch-icon" href="icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <!-- <link rel="stylesheet" href="css/normalize.css"> -->
+        <!-- <link rel="stylesheet" href="css/main.css"> -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.no-deps.min.js"></script> -->
   <script src='https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js'></script>
+  <style>
+  #logo{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+  </style>
 </head>
 
 <body>
-  <div id="logo" style="width: 800px;height: 800px;text-align: center;"></div>
-  <canvas id='canvas' width="400" height=400/>
+  <div id="logo" style="width: 400px;height: 400px;text-align: center;margin: 0 auto;"></div>
 
   <script>
-
+    var canvasSize = 400;
     var size = 200;
     var frames = 3;
     var linesCount = 15;
     var xScale = 5;
+    var sortedNodes = [];
 
 // define the path to plot
 var points = [];
@@ -41,6 +63,12 @@ points.push({
   x: points[0].x,
   y: points[0].y
 });
+
+for(let i=0; i<points.length; i++){
+  let point = points[i];
+  point.x += (canvasSize - size) / 2;
+  point.y += (canvasSize - size) / 2;
+}
 
 // points.push({
 //   x: size / 2,
@@ -89,17 +117,64 @@ for (let lines = 1; lines < linesCount; lines++){
 }
 
 
-var c = Raphael("logo", size * 2, size * 2);
+var c = Raphael("logo", canvasSize, canvasSize);
 var pathes = [];
 var nodes = [];
-let duration = 150;
+var inner = [];
+var outer = [];
+let duration = 100;
 let durationStep = (200 - 30) / points.length;
 
 setTimeout(animate, duration);
 
-console.log('points', points);
-
 var cursor = 0;
+
+// function scale(){
+//           nodes.forEach(function(node){
+//             node.animate({
+//               transform: 'S1',
+//             }, 500, 'bounce');
+//           });
+//         }
+
+function modify(point){
+  let modifierX = canvasSize / 2 - size;
+  let modifierY = 100;
+  return {
+    x: point.x + modifierX,
+    y: point.y + modifierY,
+  }
+}
+
+function scale(){
+  if (!sortedNodes.length){
+    outer.forEach(function(node, idx){
+      sortedNodes.push(node);
+    });
+
+    let innerCopy = inner.slice();
+    innerCopy.reverse();
+
+    innerCopy.forEach(function(node, idx){
+      sortedNodes.push(node);
+    });
+  }
+
+  sortedNodes.forEach(function(node, idx){
+      node.animate({
+        stroke: '#ddd',
+      }, 300, function(){
+        setTimeout(function(){
+            let s = (idx - idx % 5) / 5 / linesCount * 5;
+            node.animate({
+              stroke: '#ddd',
+              // transform: 'S' + s + ',' + s + ',300,200',
+              transform: 'S5,5,300,200',
+            }, 400, 'easeInOut');
+          }, (idx - idx % 5) / 5 * 300)
+      });
+  });
+}
 
 function animate(){
   if (cursor < points.length / 1 - 1){
@@ -108,52 +183,65 @@ function animate(){
 
   } else {
     setTimeout(function(){
-      nodes.forEach(function(node){
-        node.animate({
-          transform: 'R0'
-        // }, 500, 'easeInOut');
-        }, 1000, 'elastic');
+      nodes.forEach(function(node, idx){
+          node.animate({
+            // transform: 'R0 S2,2,' + (size / 2) + ',' + (size /2),
+            transform: 'R0 S1,1,' + (size / 2) + ',' + (size /2),
+            stroke: '#000',
+          }, 1000, 'bounce', );
       })
     }, duration);
+    // setTimeout(scale, duration + 600);
   }
 
   let reverseCursor = points.length - cursor - 1;
   let count = points.length;
   let p1 = drawLine(points[cursor], points[cursor + 1], duration);
   let p2 = drawLine(points[reverseCursor], points[reverseCursor - 1], duration);
-  let deg = 180 / linesCount * ((cursor - cursor % 5) / 5);
-  console.log('deg', deg);
+  let rectIndex = ((cursor - cursor % 5) / 5);
+  let deg = 360 / (linesCount + 1) * rectIndex;
 
-  let center = size / 2;
+
+  // let center = modify({
+  //   x: size / 2,
+  //   y: size / 2,
+  // });
+
+  let center = {
+    x: canvasSize / 2,
+    y: canvasSize / 2,
+  };
+
   let origin = center + ',' + center;
 
   p1.attr({
-    // transform: 'R45,' + size / 2 + ',' + size / 2,
-    // transform: 'R' + deg + ',' + size / 2 + ',' + size / 2,
-    transform: `S2,2,${center},${center} R` + deg + ',' + center + ',' + size / 2,
-    // transform: 'R' + deg + ',' + center + ',' + size / 2,
+    transform: `S2,2,${center.x},${center.y} R` + deg + ',' + center.x + ',' + center.y,
   })
 
   p2.attr({
-    // transform: `S1.5,1.5,0,0 R-` + deg + ',' + center + ',' + size / 2,
-    transform: `S2,2,${center},${center} R-` + deg + ',' + center + ',' + size / 2,
-    // transform: 'R-' + deg + ',' + size / 2 + ',' + size / 2,
+    transform: `S2,2,${center.x},${center.y} R-` + (360 - deg) + ',' + center.x + ',' + center.y,
   })
 
   nodes.push(p1);
   nodes.push(p2);
-  // group.push(p1, p2);
+
+  outer.push(p1);
+  inner.push(p2);
+
   cursor ++;
 }
 
 function drawLine(start, to, duration, rotate){
+  // start = modify(start);
+  // to = modify(to);
+
   let startStr = 'M' + start.x + ' ' + start.y;
   let move = c.path(startStr);
   // move.attr({'stroke-width': 3});
   // move.attr({'stroke-alignment': 'inner'});
   // move.attr({'stroke-linecap': 'square'});
   move.attr({
-    'color': '#888',
+    'stroke': '#888',
   });
 
   move.animate({
